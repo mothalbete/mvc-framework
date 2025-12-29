@@ -22,26 +22,17 @@ class Controller
         // -------------------------------------------------
         // 2. Rutas de las vistas
         // -------------------------------------------------
-        $viewFile   = __DIR__ . '/../app/Views/' . $view . '.php';
-        $headerFile = __DIR__ . '/../app/Views/layouts/header.php';
-        $footerFile = __DIR__ . '/../app/Views/layouts/footer.php';
+        $viewFile   = __DIR__ . '/../src/Views/' . $view . '.php';
+        
 
         if (!file_exists($viewFile)) {
             die("❌ Vista no encontrada: $view");
         }
 
-        // -------------------------------------------------
-        // 3. Cargar layout + vista
-        // -------------------------------------------------
-        if (file_exists($headerFile)) {
-            require_once $headerFile;
-        }
+       
 
         require_once $viewFile;
 
-        if (file_exists($footerFile)) {
-            require_once $footerFile;
-        }
     }
 
     /**
