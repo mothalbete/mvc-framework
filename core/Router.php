@@ -27,14 +27,9 @@ class Router
         // -------------------------------------------------
         // 3. Ruta al controlador
         // -------------------------------------------------
-        $controllerClass = 'Formacom\\Mvc\\Controllers\\' . $controllerName;
-        $controllerFile  = __DIR__ . '/../src/Controllers/' . $controllerName . '.php';
+        $controllerClass = 'App\\Controllers\\' . $controllerName;
 
-        if (!file_exists($controllerFile)) {
-            die("❌ Controlador no encontrado: $controllerName");
-        }
-
-        require_once $controllerFile;
+     
 
         if (!class_exists($controllerClass)) {
             die("❌ Clase $controllerClass no existe");

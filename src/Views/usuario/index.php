@@ -7,5 +7,9 @@
 </head>
 <body>
     vista del usuario
+    //muestrar los usuarios
+    <?php foreach ($usuarios as $usuario): ?>
+        <p>Usuario: <?= htmlspecialchars($usuario->nombre) ?> - Email: <?= htmlspecialchars($usuario->email) ?></p>
+    <?php endforeach; ?>
 </body>
 </html>
