@@ -36,7 +36,7 @@ class SessionMiddleware
 
         // Comprobamos sesión
         if (!$this->isAuthenticated()) {
-            header('Location: /mvc-framework');
+            header('Location: ' . BASE_URL);
             exit;
         }
     }
