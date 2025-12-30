@@ -25,7 +25,7 @@ class AuthController extends Controller
         $usuario=Usuario::where('email',$_POST['email'])->first();
         if ($usuario && password_verify($_POST['password'], $usuario->password)) {
             // Credenciales correctas
-            $_SESSION['user_id'] = $usuario->id;
+            $_SESSION['user_id'] = $usuario->usuario_id;
             header('Location: ' . BASE_URL . 'dashboard');
             exit;
         } else {
