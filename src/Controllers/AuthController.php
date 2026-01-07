@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     public function login(): void
     {
-        if(isset($_POST['email']) && isset($_POST['password'])){
+        if (isset($_POST['email']) && isset($_POST['password'])) {
             $this->procesar();
             return;
         }
@@ -20,16 +20,23 @@ class AuthController extends Controller
 
     public function register(): void
     {
-        if(isset($_POST['email']) && isset($_POST['nombre']) && isset($_POST['password'])){
+        if (isset($_POST['email']) && isset($_POST['nombre']) && isset($_POST['password'])) {
             //procesar registro
-            $usuario=new Usuario();
-            $usuario->email=$_POST['email'];
-            $usuario->nombre=$_POST['nombre'];
-            $usuario->password=password_hash($_POST['password'], PASSWORD_BCRYPT);
-            $usuario->save();
-            //redireccionar al login
-            header('Location: ' . BASE_URL.'auth/login');
-            exit;
+            try {
+                $usuario = new Usuario();
+                $usuario->email = $_POST['email'];
+                $usuario->nombre = $_POST['nombre'];
+                $usuario->password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+                $usuario->save();
+                //redireccionar al login
+                header('Location: ' . BASE_URL . 'auth/login');
+                exit;
+            } catch (\Exception $e) {
+                $this->view('auth/register', [
+                    'error' => 'Error al registrar el usuario: email ya existente'
+                ]);
+                return;
+            }
         }
         $this->view('auth/register', []);
     }
@@ -37,7 +44,7 @@ class AuthController extends Controller
     {
         //usar el modelo User para validar el login
         //buscar usuario por email
-        $usuario=Usuario::where('email',$_POST['email'])->first();
+        $usuario = Usuario::where('email', $_POST['email'])->first();
         if ($usuario && password_verify($_POST['password'], $usuario->password)) {
             // Credenciales correctas
             $_SESSION['user_id'] = $usuario->usuario_id;

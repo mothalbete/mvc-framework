@@ -19,5 +19,9 @@
         <br>
         <button type="submit">Registrarse</button>
     </form>
+        <?php if (isset($error)): ?>
+        <p style="color: red;"><?php echo htmlspecialchars($error); ?>
+    </p>
+    <?php endif; ?>
 </body>
 </html>
