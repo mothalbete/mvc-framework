@@ -11,6 +11,10 @@ class AuthController extends Controller
 {
     public function login(): void
     {
+        if(isset($_POST['email']) && isset($_POST['password'])){
+            $this->procesar();
+            return;
+        }
         $this->view('auth/login', []);
     }
 
