@@ -20,9 +20,20 @@ class AuthController extends Controller
 
     public function register(): void
     {
-        
+        if(isset($_POST['email']) && isset($_POST['nombre']) && isset($_POST['password'])){
+            //procesar registro
+            $usuario=new Usuario();
+            $usuario->email=$_POST['email'];
+            $usuario->nombre=$_POST['nombre'];
+            $usuario->password=password_hash($_POST['password'], PASSWORD_BCRYPT);
+            $usuario->save();
+            //redireccionar al login
+            header('Location: ' . BASE_URL.'auth/login');
+            exit;
+        }
+        $this->view('auth/register', []);
     }
-    public function procesar(): void
+    private function procesar(): void
     {
         //usar el modelo User para validar el login
         //buscar usuario por email
