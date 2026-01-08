@@ -9,17 +9,16 @@ class SessionMiddleware
      * Controladores públicos (sin login)
      */
     protected array $publicControllers = [
-        'HomeController',
-        'AuthController'
+        'HomeController'
     ];
 
     /**
-     * Métodos públicos concretos (opcional)
-     * Ej: LoginController@index
+     * Métodos públicos concretos
      */
     protected array $publicMethods = [
         'AuthController@login',
-        'AuthController@register'
+        'AuthController@register',
+        'AuthController@logout'
     ];
 
     public function handle(string $controller, string $method): void
@@ -36,7 +35,7 @@ class SessionMiddleware
 
         // Comprobamos sesión
         if (!$this->isAuthenticated()) {
-            header('Location: ' . BASE_URL);
+            header('Location: ' . BASE_URL . 'auth/login');
             exit;
         }
     }

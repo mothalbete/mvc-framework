@@ -13,27 +13,19 @@ class Controller
      * @param array  $data  Datos para la vista
      */
     protected function view(string $view, array $data = []): void
-    {
-        // -------------------------------------------------
-        // 1. Convertir array de datos en variables
-        // -------------------------------------------------
-        extract($data);
+{
+    extract($data);
 
-        // -------------------------------------------------
-        // 2. Rutas de las vistas
-        // -------------------------------------------------
-        $viewFile   = __DIR__ . '/../src/Views/' . $view . '.php';
-        
+    $viewFile = __DIR__ . '/../src/Views/' . $view . '.php';
+    $layoutFile = __DIR__ . '/../src/Views/layout.php';
 
-        if (!file_exists($viewFile)) {
-            die("❌ Vista no encontrada: $view");
-        }
-
-       
-
-        require_once $viewFile;
-
+    if (!file_exists($viewFile)) {
+        die("❌ Vista no encontrada: $view");
     }
+
+    require $layoutFile;
+}
+
 
     /**
      * Redirección HTTP
