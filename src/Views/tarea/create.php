@@ -19,6 +19,7 @@
     <div class="mb-3">
         <label class="form-label">Proyecto</label>
         <select name="proyecto_id" class="form-select" required>
+            <option value="">Selecciona un proyecto</option>
             <?php foreach ($proyectos as $p): ?>
                 <option value="<?= $p->proyecto_id ?>"><?= htmlspecialchars($p->nombre) ?></option>
             <?php endforeach; ?>

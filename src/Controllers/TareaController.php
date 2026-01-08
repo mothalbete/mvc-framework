@@ -13,8 +13,7 @@ class TareaController extends Controller
 {
     public function index(): void
     {
-        $tareas = Tarea::with(['proyecto', 'estado', 'usuario'])
-                       ->get();
+        $tareas = Tarea::with(['proyecto', 'estado', 'usuario'])->get();
 
         $this->view('tarea/index', [
             'tareas' => $tareas
@@ -38,7 +37,7 @@ class TareaController extends Controller
     {
         try {
             Tarea::create([
-                'usuario_id'   => $_POST['usuario_id'], // ← CORREGIDO
+                'usuario_id'   => $_POST['usuario_id'], 
                 'proyecto_id'  => $_POST['proyecto_id'],
                 'estado_id'    => $_POST['estado_id'],
                 'titulo'       => $_POST['titulo'],
@@ -98,7 +97,7 @@ class TareaController extends Controller
 
         try {
             $tarea->update([
-                'usuario_id'   => $_POST['usuario_id'], // ← CORREGIDO
+                'usuario_id'   => $_POST['usuario_id'],
                 'proyecto_id'  => $_POST['proyecto_id'],
                 'estado_id'    => $_POST['estado_id'],
                 'titulo'       => $_POST['titulo'],
