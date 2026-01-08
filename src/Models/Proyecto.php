@@ -16,7 +16,6 @@ class Proyecto extends Model
         'titulo',
         'descripcion',
         'fecha_inicio',
-        'fecha_fin',
         'usuario_id'
     ];
 

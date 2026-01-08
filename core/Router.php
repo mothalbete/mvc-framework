@@ -1,64 +1,47 @@
 <?php
-declare(strict_types=1);
-
 namespace Core;
-
-use Core\Middleware\SessionMiddleware;
 
 class Router
 {
-    protected string $controllerNamespace = 'App\\Controllers';
+    private array $routes = [];
+
+    public function get(string $uri, string $action): void
+    {
+        $this->routes['GET'][$uri] = $action;
+    }
+
+    public function post(string $uri, string $action): void
+    {
+        $this->routes['POST'][$uri] = $action;
+    }
 
     public function dispatch(): void
     {
-        // Obtener URL limpia
-        $url = $_GET['url'] ?? '';
-        $url = trim($url, '/');
-        $segments = explode('/', $url);
+        $uri = $_GET['url'] ?? '';
+        $uri = trim($uri, '/');
+        $method = $_SERVER['REQUEST_METHOD'];
 
-        // Controlador
-        $controllerName = !empty($segments[0])
-            ? ucfirst($segments[0]) . 'Controller'
-            : 'HomeController';
+        if (!isset($this->routes[$method][$uri])) {
+            http_response_code(404);
+            die("404 - Ruta no encontrada");
+        }
 
-        $controllerClass = $this->controllerNamespace . '\\' . $controllerName;
+        [$controller, $action] = explode('@', $this->routes[$method][$uri]);
+
+        $controllerClass = "App\\Controllers\\$controller";
 
         if (!class_exists($controllerClass)) {
-            die('404 - Controlador no encontrado');
+            http_response_code(404);
+            die("404 - Controlador no encontrado");
         }
 
-        // Método
-        $method = $segments[1] ?? 'index';
+        $instance = new $controllerClass();
 
-        // Si es POST y existe un método "store" o "update", lo usamos
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-            // Si la URL es /proyecto/create → método store()
-            if ($method === 'create') {
-                $method = 'store';
-            }
-
-            // Si la URL es /proyecto/edit/5 → método update(5)
-            if ($method === 'edit') {
-                $method = 'update';
-            }
+        if (!method_exists($instance, $action)) {
+            http_response_code(404);
+            die("404 - Método no encontrado");
         }
 
-        // Parámetros
-        $params = array_slice($segments, 2);
-
-        // Middleware de sesión
-        $middleware = new SessionMiddleware();
-        $middleware->handle($controllerName, $method);
-
-        // Instanciar controlador
-        $controller = new $controllerClass();
-
-        if (!method_exists($controller, $method)) {
-            die('404 - Método no encontrado');
-        }
-
-        // Ejecutar método
-        call_user_func_array([$controller, $method], $params);
+        $instance->$action();
     }
 }

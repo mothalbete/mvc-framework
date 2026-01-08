@@ -21,7 +21,7 @@
         <select name="proyecto_id" class="form-select" required>
             <option value="">Selecciona un proyecto</option>
             <?php foreach ($proyectos as $p): ?>
-                <option value="<?= $p->proyecto_id ?>"><?= htmlspecialchars($p->nombre) ?></option>
+                <option value="<?= $p->proyecto_id ?>"><?= htmlspecialchars($p->titulo) ?></option>
             <?php endforeach; ?>
         </select>
     </div>

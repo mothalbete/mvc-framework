@@ -42,7 +42,6 @@ class TareaController extends Controller
                 'estado_id'    => $_POST['estado_id'],
                 'titulo'       => $_POST['titulo'],
                 'descripcion'  => $_POST['descripcion'],
-                'fecha_limite' => $_POST['fecha_limite'] ?: null
             ]);
 
             $_SESSION['flash'] = [
@@ -102,7 +101,6 @@ class TareaController extends Controller
                 'estado_id'    => $_POST['estado_id'],
                 'titulo'       => $_POST['titulo'],
                 'descripcion'  => $_POST['descripcion'],
-                'fecha_limite' => $_POST['fecha_limite'] ?: null
             ]);
 
             $_SESSION['flash'] = [

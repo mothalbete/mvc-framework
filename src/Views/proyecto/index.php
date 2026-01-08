@@ -27,12 +27,12 @@
                     <h4 class="fw-bold mb-0"><?= htmlspecialchars($proyecto->titulo) ?></h4>
 
                     <div>
-                        <a href="<?= BASE_URL ?>proyecto/edit/<?= $proyecto->proyecto_id ?>" 
+                        <a href="<?= BASE_URL ?>proyecto/edit?id=<?= $proyecto->proyecto_id ?>" 
                            class="btn btn-sm btn-outline-secondary">
                             Editar
                         </a>
 
-                        <a href="<?= BASE_URL ?>proyecto/delete/<?= $proyecto->proyecto_id ?>" 
+                        <a href="<?= BASE_URL ?>proyecto/delete?id=<?= $proyecto->proyecto_id ?>" 
                            class="btn btn-sm btn-outline-danger"
                            onclick="return confirm('¿Seguro que deseas eliminar este proyecto?')">
                             Eliminar
@@ -41,7 +41,7 @@
                 </div>
 
                 <p class="text-muted mt-2 mb-3">
-                    <?= htmlspecialchars($proyecto->descripcion ?: 'Sin descripción') ?>
+                    <?= htmlspecialchars($proyecto->descrion ?: 'Sin descripción') ?>
                 </p>
 
                 <!-- Acordeón de tareas -->

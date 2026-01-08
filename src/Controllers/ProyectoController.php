@@ -5,16 +5,12 @@ namespace App\Controllers;
 
 use Core\Controller;
 use App\Models\Proyecto;
-use App\Models\Tarea;
 
 class ProyectoController extends Controller
 {
     public function index(): void
     {
-
-        $proyectos = Proyecto::where('usuario_id', $_SESSION['user_id'])
-                     ->with(['tareas', 'tareas.usuario', 'tareas.estado'])
-                     ->get();
+        $proyectos = Proyecto::with('tareas.usuario', 'tareas.estado')->get();
 
         $this->view('proyecto/index', [
             'proyectos' => $proyectos
@@ -28,36 +24,29 @@ class ProyectoController extends Controller
 
     public function store(): void
     {
-        try {
-            Proyecto::create([
-                'usuario_id' => $_SESSION['user_id'],
-                'titulo' => $_POST['titulo'],
-                'descripcion' => $_POST['descripcion'],
-                'fecha_inicio' => $_POST['fecha_inicio'] ?: null,
-                'fecha_fin' => $_POST['fecha_fin'] ?: null
-            ]);
+        Proyecto::create([
+            'titulo' => $_POST['titulo'],
+            'descrion' => $_POST['descrion'],
+            'comentarios' => $_POST['comentarios'],
+            'usuario_id' => $_SESSION['user_id']
+        ]);
 
-            $_SESSION['flash'] = [
-                'type' => 'success',
-                'message' => 'Proyecto creado correctamente'
-            ];
-
-            $this->redirect(BASE_URL . 'proyecto');
-
-        } catch (\Exception $e) {
-
-            $this->view('proyecto/create', [
-                'error' => $e->getMessage()
-            ]);
-        }
+        header("Location: " . BASE_URL . "proyecto");
+        exit;
     }
 
-    public function edit(int $id): void
+    public function edit(): void
     {
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
+            die("ID no proporcionado");
+        }
+
         $proyecto = Proyecto::find($id);
 
-        if (!$proyecto || $proyecto->usuario_id !== $_SESSION['user_id']) {
-            die('No tienes permiso para editar este proyecto');
+        if (!$proyecto) {
+            die("Proyecto no encontrado");
         }
 
         $this->view('proyecto/edit', [
@@ -65,53 +54,47 @@ class ProyectoController extends Controller
         ]);
     }
 
-    public function update(int $id): void
+    public function update(): void
     {
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
+            die("ID no proporcionado");
+        }
+
         $proyecto = Proyecto::find($id);
 
-        if (!$proyecto || $proyecto->usuario_id !== $_SESSION['user_id']) {
-            die('No tienes permiso para editar este proyecto');
+        if (!$proyecto) {
+            die("Proyecto no encontrado");
         }
 
-        try {
-            $proyecto->update([
-                'titulo' => $_POST['titulo'],
-                'descripcion' => $_POST['descripcion'],
-                'fecha_inicio' => $_POST['fecha_inicio'] ?: null,
-                'fecha_fin' => $_POST['fecha_fin'] ?: null
-            ]);
+        $proyecto->update([
+            'titulo' => $_POST['titulo'],
+            'descrion' => $_POST['descrion'],
+            'comentarios' => $_POST['comentarios']
+        ]);
 
-            $_SESSION['flash'] = [
-                'type' => 'success',
-                'message' => 'Proyecto actualizado correctamente'
-            ];
-
-            $this->redirect(BASE_URL . 'proyecto');
-
-        } catch (\Exception $e) {
-
-            $this->view('proyecto/edit', [
-                'proyecto' => $proyecto,
-                'error' => $e->getMessage()
-            ]);
-        }
+        header("Location: " . BASE_URL . "proyecto");
+        exit;
     }
 
-    public function delete(int $id): void
+    public function delete(): void
     {
+        $id = $_GET['id'] ?? null;
+
+        if (!$id) {
+            die("ID no proporcionado");
+        }
+
         $proyecto = Proyecto::find($id);
 
-        if (!$proyecto || $proyecto->usuario_id !== $_SESSION['user_id']) {
-            die('No tienes permiso para eliminar este proyecto');
+        if (!$proyecto) {
+            die("Proyecto no encontrado");
         }
 
         $proyecto->delete();
 
-        $_SESSION['flash'] = [
-            'type' => 'success',
-            'message' => 'Proyecto eliminado correctamente'
-        ];
-
-        $this->redirect(BASE_URL . 'proyecto');
+        header("Location: " . BASE_URL . "proyecto");
+        exit;
     }
 }

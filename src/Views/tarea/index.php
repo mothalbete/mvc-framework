@@ -1,24 +1,62 @@
-<div class="container">
-    <h1 class="mb-4">Mis tareas asignadas</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Mis tareas</h2>
 
-    <?php if (count($tareas) === 0): ?>
-        <div class="alert alert-info">No tienes tareas asignadas.</div>
-    <?php endif; ?>
-
-    <div class="list-group">
-        <?php foreach ($tareas as $t): ?>
-            <div class="list-group-item">
-                <h5><?= $t->titulo ?></h5>
-
-                <p class="mb-1">
-                    <strong>Estado:</strong> <?= $t->estado->nombre ?><br>
-                    <strong>Proyecto:</strong> <?= $t->proyecto->titulo ?>
-                </p>
-
-                <a href="<?= BASE_URL ?>tarea/editar/<?= $t->tarea_id ?>" class="btn btn-sm btn-warning">Editar</a>
-                <a href="<?= BASE_URL ?>tarea/eliminar/<?= $t->tarea_id ?>" class="btn btn-sm btn-danger">Eliminar</a>
-            </div>
-        <?php endforeach; ?>
-    </div>
+    <a href="<?= BASE_URL ?>tarea/create" class="btn btn-primary">
+        + Nueva tarea
+    </a>
 </div>
 
+<?php if (empty($tareas)): ?>
+
+    <div class="alert alert-info text-center">
+        No hay tareas registradas.
+    </div>
+
+<?php else: ?>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Proyecto</th>
+            <th>Asignada a</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php foreach ($tareas as $tarea): ?>
+            <tr>
+                <td><?= htmlspecialchars($tarea->titulo) ?></td>
+                <td><?= htmlspecialchars($tarea->proyecto->titulo ?? 'Sin proyecto') ?></td>
+                <td><?= htmlspecialchars($tarea->usuario->nombre ?? 'Sin asignar') ?></td>
+
+                <td>
+                    <?php
+                        $estado = $tarea->estado->nombre ?? 'Desconocido';
+                        $badge = 'secondary';
+
+                        if ($estado === 'Pendiente') $badge = 'warning';
+                        if ($estado === 'En progreso') $badge = 'primary';
+                        if ($estado === 'Completada') $badge = 'success';
+                    ?>
+                    <span class="badge bg-<?= $badge ?>"><?= $estado ?></span>
+                </td>
+
+                <td class="text-end">
+                    <a href="<?= BASE_URL ?>tarea/edit?id=<?= $tarea->tarea_id ?>" 
+                       class="btn btn-sm btn-outline-secondary">Editar</a>
+
+                    <a href="<?= BASE_URL ?>tarea/delete?id=<?= $tarea->tarea_id ?>" 
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('¿Seguro que deseas eliminar esta tarea?')">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php endif; ?>
