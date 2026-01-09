@@ -12,9 +12,13 @@ session_start();
 
 // 1. Autoload de Composer
 require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/core/View.php';
 
 // 2. Configuración de base de datos
-$dbConfig = require_once __DIR__ . '/config/database.php';
+// Antes apuntaba a config/database.php (no existe)
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config/database.php';
+
 
 // 3. Cargar Router
 require_once __DIR__ . '/core/Router.php';

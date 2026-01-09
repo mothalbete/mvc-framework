@@ -3,96 +3,116 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Core\Controller;
 use App\Models\Proyecto;
+use Core\View;
 
-class ProyectoController extends Controller
+class ProyectoController
 {
-    public function index(): void
+    private function requireLogin(): int
     {
-        $proyectos = Proyecto::with('tareas.usuario', 'tareas.estado')->get();
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: " . BASE_URL . "login");
+            exit;
+        }
 
-        $this->view('proyecto/index', [
+        return (int) $_SESSION['user_id'];
+    }
+
+    private function findUserProjectOrFail(int $id, int $userId): Proyecto
+    {
+        $proyecto = Proyecto::where('proyecto_id', $id)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        if (!$proyecto) {
+            http_response_code(403);
+            die("No tienes permiso para acceder a este proyecto.");
+        }
+
+        return $proyecto;
+    }
+
+    public function index()
+    {
+        $userId = $this->requireLogin();
+
+        $proyectos = Proyecto::with(['tareas.usuario', 'tareas.estado'])
+            ->where('usuario_id', $userId)
+            ->get();
+
+        return View::render('proyecto/index', [
             'proyectos' => $proyectos
         ]);
     }
 
-    public function create(): void
+    public function create()
     {
-        $this->view('proyecto/create');
+        $this->requireLogin();
+
+        return View::render('proyecto/create');
     }
 
-    public function store(): void
+    public function store()
     {
+        $userId = $this->requireLogin();
+
+        $titulo = trim($_POST['titulo'] ?? '');
+        $descripcion = trim($_POST['descripcion'] ?? '');
+        $comentarios = trim($_POST['comentarios'] ?? '');
+
+        if ($titulo === '') {
+            return View::render('proyecto/create', [
+                'error' => 'El título es obligatorio'
+            ]);
+        }
+
         Proyecto::create([
-            'titulo' => $_POST['titulo'],
-            'descrion' => $_POST['descrion'],
-            'comentarios' => $_POST['comentarios'],
-            'usuario_id' => $_SESSION['user_id']
+            'titulo'      => $titulo,
+            'descripcion' => $descripcion,
+            'fecha_inicio'=> date('Y-m-d'),
+            'usuario_id'  => $userId
         ]);
 
         header("Location: " . BASE_URL . "proyecto");
         exit;
     }
 
-    public function edit(): void
+    public function edit()
     {
-        $id = $_GET['id'] ?? null;
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$id) {
-            die("ID no proporcionado");
-        }
+        $proyecto = $this->findUserProjectOrFail($id, $userId);
 
-        $proyecto = Proyecto::find($id);
-
-        if (!$proyecto) {
-            die("Proyecto no encontrado");
-        }
-
-        $this->view('proyecto/edit', [
+        return View::render('proyecto/edit', [
             'proyecto' => $proyecto
         ]);
     }
 
-    public function update(): void
+    public function update()
     {
-        $id = $_GET['id'] ?? null;
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$id) {
-            die("ID no proporcionado");
-        }
+        $proyecto = $this->findUserProjectOrFail($id, $userId);
 
-        $proyecto = Proyecto::find($id);
-
-        if (!$proyecto) {
-            die("Proyecto no encontrado");
-        }
-
-        $proyecto->update([
-            'titulo' => $_POST['titulo'],
-            'descrion' => $_POST['descrion'],
-            'comentarios' => $_POST['comentarios']
-        ]);
+        $proyecto->titulo      = trim($_POST['titulo'] ?? '');
+        $proyecto->descripcion = trim($_POST['descripcion'] ?? '');
+        $proyecto->comentarios = trim($_POST['comentarios'] ?? '');
+        $proyecto->save();
 
         header("Location: " . BASE_URL . "proyecto");
         exit;
     }
 
-    public function delete(): void
+    public function delete()
     {
-        $id = $_GET['id'] ?? null;
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$id) {
-            die("ID no proporcionado");
-        }
+        $proyecto = $this->findUserProjectOrFail($id, $userId);
 
-        $proyecto = Proyecto::find($id);
-
-        if (!$proyecto) {
-            die("Proyecto no encontrado");
-        }
-
-        $proyecto->delete();
+        $proyecto->delete(); // ON DELETE CASCADE eliminará tareas
 
         header("Location: " . BASE_URL . "proyecto");
         exit;

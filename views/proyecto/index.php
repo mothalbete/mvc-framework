@@ -41,7 +41,8 @@
                 </div>
 
                 <p class="text-muted mt-2 mb-3">
-                    <?= htmlspecialchars($proyecto->descrion ?: 'Sin descripción') ?>
+                    <!-- antes: $proyecto->descrion -->
+                    <?= htmlspecialchars($proyecto->descripcion ?? 'Sin descripción') ?>
                 </p>
 
                 <!-- Acordeón de tareas -->
@@ -97,7 +98,7 @@
                                                             if ($estado === 'Completada') $badge = 'success';
                                                         ?>
                                                         <span class="badge bg-<?= $badge ?>">
-                                                            <?= $estado ?>
+                                                            <?= htmlspecialchars($estado) ?>
                                                         </span>
                                                     </td>
                                                 </tr>

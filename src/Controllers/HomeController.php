@@ -3,33 +3,33 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Core\Controller;
 use App\Models\Usuario;
 use App\Models\Proyecto;
 use App\Models\Tarea;
+use Core\View;
 
-class HomeController extends Controller
+class HomeController
 {
-    public function index(): void
+    public function index()
     {
-        // Usuario logueado
-        $usuario = Usuario::find($_SESSION['user_id']);
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: " . BASE_URL . "login");
+            exit;
+        }
 
-        // Estadísticas del dashboard
-        $totalProyectos = Proyecto::where('usuario_id', $_SESSION['user_id'])->count();
+        $userId = (int) $_SESSION['user_id'];
+        $usuario = Usuario::find($userId);
 
-        $totalTareas = Tarea::where('usuario_id', $_SESSION['user_id'])->count();
-
-        $tareasPendientes = Tarea::where('usuario_id', $_SESSION['user_id'])
-                                 ->where('estado_id', 1) // Pendiente
-                                 ->count();
-
-        // Enviar datos a la vista
-        $this->view('home/index', [
-            'usuario' => $usuario,
-            'totalProyectos' => $totalProyectos,
-            'totalTareas' => $totalTareas,
-            'tareasPendientes' => $tareasPendientes
+        return View::render('home/index', [
+            'usuario'          => $usuario,
+            'totalProyectos'   => Proyecto::where('usuario_id', $userId)->count(),
+            'totalTareas'      => Tarea::whereHas('proyecto', function ($q) use ($userId) {
+                                        $q->where('usuario_id', $userId);
+                                   })->count(),
+            'tareasPendientes' => Tarea::where('estado_id', 1)
+                                   ->whereHas('proyecto', function ($q) use ($userId) {
+                                       $q->where('usuario_id', $userId);
+                                   })->count()
         ]);
     }
 }

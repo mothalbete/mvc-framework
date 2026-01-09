@@ -14,7 +14,7 @@
 
     <div class="mb-3">
         <label class="form-label">Descripción</label>
-        <textarea name="descripcion" class="form-control"><?= htmlspecialchars($tarea->descripcion) ?></textarea>
+        <textarea name="descripcion" class="form-control"><?= htmlspecialchars($tarea->descripcion ?? '') ?></textarea>
     </div>
 
     <div class="mb-3">
@@ -51,12 +51,6 @@
                 </option>
             <?php endforeach; ?>
         </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Fecha límite</label>
-        <input type="date" name="fecha_limite" class="form-control" 
-               value="<?= $tarea->fecha_limite ?>">
     </div>
 
     <button class="btn btn-primary">Guardar cambios</button>

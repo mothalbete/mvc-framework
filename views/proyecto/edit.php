@@ -14,12 +14,13 @@
 
     <div class="mb-3">
         <label class="form-label">Descripción</label>
-        <textarea name="descrion" class="form-control"><?= htmlspecialchars($proyecto->descrion) ?></textarea>
+        <!-- antes: name="descrion" y $proyecto->descrion -->
+        <textarea name="descripcion" class="form-control"><?= htmlspecialchars($proyecto->descripcion ?? '') ?></textarea>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Comentarios</label>
-        <textarea name="comentarios" class="form-control"><?= htmlspecialchars($proyecto->comentarios) ?></textarea>
+        <textarea name="comentarios" class="form-control"><?= htmlspecialchars($proyecto->comentarios ?? '') ?></textarea>
     </div>
 
     <button class="btn btn-primary">Guardar cambios</button>

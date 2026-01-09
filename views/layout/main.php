@@ -36,10 +36,12 @@
                         <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>proyecto">Proyectos</a></li>
                         <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>tarea">Tareas</a></li>
                         <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>usuario">Mi perfil</a></li>
-                        <li class="nav-item"><a class="nav-link text-danger" href="<?= BASE_URL ?>auth/logout">Salir</a></li>
+                        <!-- antes apuntaba a auth/logout pero la ruta es 'logout' -->
+                        <li class="nav-item"><a class="nav-link text-danger" href="<?= BASE_URL ?>logout">Salir</a></li>
                     <?php else: ?>
-                        <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>auth/login">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>auth/register">Registro</a></li>
+                        <!-- antes: auth/login y auth/register -->
+                        <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>login">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>register">Registro</a></li>
                     <?php endif; ?>
 
                 </ul>
@@ -52,8 +54,8 @@
 
     <!-- Mensajes flash -->
     <?php if (!empty($_SESSION['flash'])): ?>
-        <div class="alert alert-<?= $_SESSION['flash']['type'] ?> alert-dismissible fade show">
-            <?= $_SESSION['flash']['message'] ?>
+        <div class="alert alert-<?= htmlspecialchars($_SESSION['flash']['type']) ?> alert-dismissible fade show">
+            <?= htmlspecialchars($_SESSION['flash']['message']) ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php unset($_SESSION['flash']); ?>

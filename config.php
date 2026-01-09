@@ -1,7 +1,8 @@
 <?php
+declare(strict_types=1);
+
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'projectgest');    
+define('DB_NAME', 'projectgest');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('BASE_URL', '/ProjectGest/');  
-?>
+define('BASE_URL', '/ProjectGest/');

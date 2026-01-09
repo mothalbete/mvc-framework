@@ -3,144 +3,159 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Core\Controller;
 use App\Models\Tarea;
 use App\Models\Proyecto;
 use App\Models\Estado;
 use App\Models\Usuario;
+use Core\View;
 
-class TareaController extends Controller
+class TareaController
 {
-    public function index(): void
+    private function requireLogin(): int
     {
-        $tareas = Tarea::with(['proyecto', 'estado', 'usuario'])->get();
+        if (!isset($_SESSION['user_id'])) {
+            header("Location: " . BASE_URL . "login");
+            exit;
+        }
 
-        $this->view('tarea/index', [
+        return (int) $_SESSION['user_id'];
+    }
+
+    private function findUserTaskOrFail(int $id, int $userId): Tarea
+    {
+        // Solo permite acceder a tareas de proyectos del usuario
+        $tarea = Tarea::where('tarea_id', $id)
+            ->whereHas('proyecto', function ($q) use ($userId) {
+                $q->where('usuario_id', $userId);
+            })
+            ->first();
+
+        if (!$tarea) {
+            http_response_code(403);
+            die("No tienes permiso para acceder a esta tarea.");
+        }
+
+        return $tarea;
+    }
+
+    public function index()
+    {
+        $userId = $this->requireLogin();
+
+        // 🔥 SOLO tareas asignadas al usuario logueado
+        $tareas = Tarea::with(['proyecto', 'usuario', 'estado'])
+            ->where('usuario_id', $userId)
+            ->get();
+
+        return View::render('tarea/index', [
             'tareas' => $tareas
         ]);
     }
 
-    public function create(): void
+    public function create()
     {
-        $proyectos = Proyecto::all();
-        $estados = Estado::all();
-        $usuarios = Usuario::all();
+        $userId = $this->requireLogin();
 
-        $this->view('tarea/create', [
+        // Solo proyectos del usuario logueado
+        $proyectos = Proyecto::where('usuario_id', $userId)->get();
+
+        return View::render('tarea/create', [
             'proyectos' => $proyectos,
-            'estados' => $estados,
-            'usuarios' => $usuarios
+            'estados'   => Estado::all(),
+            'usuarios'  => Usuario::all() // puedes limitarlo si quieres
         ]);
     }
 
-    public function store(): void
+    public function store()
     {
-        try {
-            Tarea::create([
-                'usuario_id'   => $_POST['usuario_id'], 
-                'proyecto_id'  => $_POST['proyecto_id'],
-                'estado_id'    => $_POST['estado_id'],
-                'titulo'       => $_POST['titulo'],
-                'descripcion'  => $_POST['descripcion'],
-            ]);
+        $userId = $this->requireLogin();
 
-            $_SESSION['flash'] = [
-                'type' => 'success',
-                'message' => 'Tarea creada correctamente'
-            ];
+        $proyectoId = (int) ($_POST['proyecto_id'] ?? 0);
 
-            $this->redirect(BASE_URL . 'tarea');
+        // Asegurarse de que el proyecto pertenece al usuario
+        $proyecto = Proyecto::where('proyecto_id', $proyectoId)
+            ->where('usuario_id', $userId)
+            ->first();
 
-        } catch (\Exception $e) {
-
-            $proyectos = Proyecto::all();
-            $estados = Estado::all();
-            $usuarios = Usuario::all();
-
-            $this->view('tarea/create', [
-                'error' => $e->getMessage(),
-                'proyectos' => $proyectos,
-                'estados' => $estados,
-                'usuarios' => $usuarios
-            ]);
+        if (!$proyecto) {
+            http_response_code(403);
+            die("No puedes crear tareas en proyectos de otros usuarios.");
         }
+
+        Tarea::create([
+            'titulo'       => trim($_POST['titulo'] ?? ''),
+            'descripcion'  => trim($_POST['descripcion'] ?? ''),
+            'comentarios'  => trim($_POST['comentarios'] ?? ''),
+            'proyecto_id'  => $proyectoId,
+            'estado_id'    => (int) ($_POST['estado_id'] ?? 1),
+            'usuario_id'   => (int) ($_POST['usuario_id'] ?? $userId),
+            'fecha_limite' => $_POST['fecha_limite'] ?: null
+        ]);
+
+        header("Location: " . BASE_URL . "tarea");
+        exit;
     }
 
-    public function edit(int $id): void
+    public function edit()
     {
-        $tarea = Tarea::find($id);
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$tarea) {
-            die('Tarea no encontrada');
-        }
+        $tarea = $this->findUserTaskOrFail($id, $userId);
 
-        $proyectos = Proyecto::all();
-        $estados = Estado::all();
-        $usuarios = Usuario::all();
+        $proyectos = Proyecto::where('usuario_id', $userId)->get();
 
-        $this->view('tarea/edit', [
-            'tarea' => $tarea,
+        return View::render('tarea/edit', [
+            'tarea'     => $tarea,
             'proyectos' => $proyectos,
-            'estados' => $estados,
-            'usuarios' => $usuarios
+            'estados'   => Estado::all(),
+            'usuarios'  => Usuario::all()
         ]);
     }
 
-    public function update(int $id): void
+    public function update()
     {
-        $tarea = Tarea::find($id);
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$tarea) {
-            die('Tarea no encontrada');
+        $tarea = $this->findUserTaskOrFail($id, $userId);
+
+        $proyectoId = (int) ($_POST['proyecto_id'] ?? 0);
+
+        // Evitar mover la tarea a un proyecto ajeno
+        $proyecto = Proyecto::where('proyecto_id', $proyectoId)
+            ->where('usuario_id', $userId)
+            ->first();
+
+        if (!$proyecto) {
+            http_response_code(403);
+            die("No puedes mover esta tarea a un proyecto que no es tuyo.");
         }
 
-        try {
-            $tarea->update([
-                'usuario_id'   => $_POST['usuario_id'],
-                'proyecto_id'  => $_POST['proyecto_id'],
-                'estado_id'    => $_POST['estado_id'],
-                'titulo'       => $_POST['titulo'],
-                'descripcion'  => $_POST['descripcion'],
-            ]);
+        $tarea->titulo       = trim($_POST['titulo'] ?? '');
+        $tarea->descripcion  = trim($_POST['descripcion'] ?? '');
+        $tarea->comentarios  = trim($_POST['comentarios'] ?? '');
+        $tarea->proyecto_id  = $proyectoId;
+        $tarea->estado_id    = (int) ($_POST['estado_id'] ?? $tarea->estado_id);
+        $tarea->usuario_id   = (int) ($_POST['usuario_id'] ?? $tarea->usuario_id);
+        $tarea->fecha_limite = $_POST['fecha_limite'] ?: null;
 
-            $_SESSION['flash'] = [
-                'type' => 'success',
-                'message' => 'Tarea actualizada correctamente'
-            ];
+        $tarea->save();
 
-            $this->redirect(BASE_URL . 'tarea');
-
-        } catch (\Exception $e) {
-
-            $proyectos = Proyecto::all();
-            $estados = Estado::all();
-            $usuarios = Usuario::all();
-
-            $this->view('tarea/edit', [
-                'tarea' => $tarea,
-                'proyectos' => $proyectos,
-                'estados' => $estados,
-                'usuarios' => $usuarios,
-                'error' => $e->getMessage()
-            ]);
-        }
+        header("Location: " . BASE_URL . "tarea");
+        exit;
     }
 
-    public function delete(int $id): void
+    public function delete()
     {
-        $tarea = Tarea::find($id);
+        $userId = $this->requireLogin();
+        $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-        if (!$tarea) {
-            die('Tarea no encontrada');
-        }
+        $tarea = $this->findUserTaskOrFail($id, $userId);
 
         $tarea->delete();
 
-        $_SESSION['flash'] = [
-            'type' => 'success',
-            'message' => 'Tarea eliminada correctamente'
-        ];
-
-        $this->redirect(BASE_URL . 'tarea');
+        header("Location: " . BASE_URL . "tarea");
+        exit;
     }
 }

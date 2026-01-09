@@ -3,115 +3,76 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Core\Controller;
 use App\Models\Usuario;
+use Core\View;
 
-class AuthController extends Controller
+class AuthController
 {
-    /* ============================
-       LOGIN
-    ============================ */
-    public function login(): void
+    public function login()
     {
-        // Si envían el formulario, procesamos
-        if (!empty($_POST['email']) && !empty($_POST['password'])) {
-            $this->procesarLogin();
-            return;
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            return View::render('auth/login');
         }
 
-        // Si no, mostramos la vista
-        $this->view('auth/login', []);
-    }
-
-    private function procesarLogin(): void
-    {
-        $email = trim($_POST['email']);
-        $password = $_POST['password'];
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
 
         $usuario = Usuario::where('email', $email)->first();
 
-        if ($usuario && password_verify($password, $usuario->password)) {
-
-            // Guardar sesión
-            $_SESSION['user_id'] = $usuario->usuario_id;
-
-            // Redirigir al dashboard
-            header('Location: ' . BASE_URL . 'home');
-            exit;
-        }
-
-        // Si falla
-        $this->view('auth/login', [
-            'error' => 'Email o contraseña incorrectos.'
-        ]);
-    }
-
-
-    /* ============================
-       REGISTER
-    ============================ */
-    public function register(): void
-    {
-        // Si envían el formulario
-        if (!empty($_POST['email']) && !empty($_POST['nombre']) && !empty($_POST['password'])) {
-            $this->procesarRegistro();
-            return;
-        }
-
-        // Mostrar vista
-        $this->view('auth/register', []);
-    }
-
-    private function procesarRegistro(): void
-    {
-        $nombre = trim($_POST['nombre']);
-        $email = trim($_POST['email']);
-        $password = $_POST['password'];
-        $passwordConfirm = $_POST['password_confirm'] ?? '';
-
-        // Validaciones básicas
-        if ($password !== $passwordConfirm) {
-            $this->view('auth/register', [
-                'error' => 'Las contraseñas no coinciden.'
+        if (!$usuario || !password_verify($password, $usuario->password)) {
+            return View::render('auth/login', [
+                'error' => 'Credenciales incorrectas'
             ]);
-            return;
         }
 
-        // Comprobar si el email ya existe
+        $_SESSION['user_id'] = $usuario->usuario_id;
+
+        header("Location: " . BASE_URL . "home");
+        exit;
+    }
+
+    public function register()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            return View::render('auth/register');
+        }
+
+        $nombre = trim($_POST['nombre'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = trim($_POST['password'] ?? '');
+        $confirm = trim($_POST['password_confirm'] ?? '');
+
+        if ($password !== $confirm) {
+            return View::render('auth/register', [
+                'error' => 'Las contraseñas no coinciden'
+            ]);
+        }
+
         if (Usuario::where('email', $email)->exists()) {
-            $this->view('auth/register', [
-                'error' => 'El email ya está registrado.'
-            ]);
-            return;
-        }
-
-        try {
-            // Crear usuario
-            $usuario = new Usuario();
-            $usuario->nombre = $nombre;
-            $usuario->email = $email;
-            $usuario->password = password_hash($password, PASSWORD_BCRYPT);
-            $usuario->save();
-
-            // Redirigir al login
-            header('Location: ' . BASE_URL . 'login');
-            exit;
-
-        } catch (\Exception $e) {
-            $this->view('auth/register', [
-                'error' => 'Error al registrar el usuario.'
+            return View::render('auth/register', [
+                'error' => 'El email ya está registrado'
             ]);
         }
+
+        Usuario::create([
+            'nombre' => $nombre,
+            'email' => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT)
+        ]);
+
+        $_SESSION['flash'] = [
+            'type' => 'success',
+            'message' => 'Cuenta creada correctamente. Ya puedes iniciar sesión.'
+        ];
+
+        header("Location: " . BASE_URL . "login");
+        exit;
     }
 
-
-    /* ============================
-       LOGOUT
-    ============================ */
-    public function logout(): void
+    public function logout()
     {
         session_destroy();
-        header('Location: ' . BASE_URL . 'login');
+        header("Location: " . BASE_URL . "login");
         exit;
     }
 }

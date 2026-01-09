@@ -8,7 +8,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center py-4">
-                    <h3 class="fw-bold"><?= $totalProyectos ?></h3>
+                    <h3 class="fw-bold"><?= (int) $totalProyectos ?></h3>
                     <p class="text-muted mb-3">Proyectos creados</p>
                     <a href="<?= BASE_URL ?>proyecto" class="btn btn-primary btn-sm">Ver proyectos</a>
                 </div>
@@ -19,7 +19,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center py-4">
-                    <h3 class="fw-bold"><?= $totalTareas ?></h3>
+                    <h3 class="fw-bold"><?= (int) $totalTareas ?></h3>
                     <p class="text-muted mb-3">Tareas totales</p>
                     <a href="<?= BASE_URL ?>tarea" class="btn btn-primary btn-sm">Ver tareas</a>
                 </div>
@@ -30,7 +30,7 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body text-center py-4">
-                    <h3 class="fw-bold"><?= $tareasPendientes ?></h3>
+                    <h3 class="fw-bold"><?= (int) $tareasPendientes ?></h3>
                     <p class="text-muted mb-3">Tareas pendientes</p>
                     <a href="<?= BASE_URL ?>tarea" class="btn btn-warning btn-sm">Revisar pendientes</a>
                 </div>

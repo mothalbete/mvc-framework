@@ -45,11 +45,6 @@
         </select>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Fecha límite</label>
-        <input type="date" name="fecha_limite" class="form-control">
-    </div>
-
     <button class="btn btn-primary">Crear tarea</button>
 
 </form>

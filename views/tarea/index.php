@@ -41,7 +41,7 @@
                         if ($estado === 'En progreso') $badge = 'primary';
                         if ($estado === 'Completada') $badge = 'success';
                     ?>
-                    <span class="badge bg-<?= $badge ?>"><?= $estado ?></span>
+                    <span class="badge bg-<?= $badge ?>"><?= htmlspecialchars($estado) ?></span>
                 </td>
 
                 <td class="text-end">
