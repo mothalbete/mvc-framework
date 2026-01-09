@@ -56,13 +56,19 @@ class TareaController
     {
         $userId = $this->requireLogin();
 
-        // Solo proyectos del usuario logueado
+        // Proyectos del usuario
         $proyectos = Proyecto::where('usuario_id', $userId)->get();
+
+        // Detectar si viene con ?proyecto_id=XX
+        $proyectoSeleccionado = isset($_GET['proyecto_id'])
+            ? (int) $_GET['proyecto_id']
+            : null;
 
         return View::render('tarea/create', [
             'proyectos' => $proyectos,
             'estados'   => Estado::all(),
-            'usuarios'  => Usuario::all() // puedes limitarlo si quieres
+            'usuarios'  => Usuario::all(),
+            'proyectoSeleccionado' => $proyectoSeleccionado
         ]);
     }
 

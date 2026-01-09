@@ -1,50 +1,37 @@
-<h2 class="fw-bold mb-4">Crear tarea</h2>
+<?php
+// Si viene desde un proyecto, ocultamos el selector
+$ocultarSelector = !empty($proyectoSeleccionado);
+?>
 
-<?php if (!empty($error)): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-<?php endif; ?>
+<?php if ($ocultarSelector): ?>
 
-<form method="POST" action="<?= BASE_URL ?>tarea/create">
+    <!-- Proyecto preseleccionado y oculto -->
+    <input type="hidden" name="proyecto_id" value="<?= $proyectoSeleccionado ?>">
 
-    <div class="mb-3">
-        <label class="form-label">Título</label>
-        <input type="text" name="titulo" class="form-control" required>
+    <div class="alert alert-info">
+        Creando tarea para el proyecto:
+        <strong>
+            <?= htmlspecialchars(
+                $proyectos->firstWhere('proyecto_id', $proyectoSeleccionado)->titulo 
+                ?? 'Proyecto desconocido'
+            ) ?>
+        </strong>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Descripción</label>
-        <textarea name="descripcion" class="form-control"></textarea>
-    </div>
+<?php else: ?>
 
+    <!-- Selector visible si NO viene desde un proyecto -->
     <div class="mb-3">
         <label class="form-label">Proyecto</label>
         <select name="proyecto_id" class="form-select" required>
             <option value="">Selecciona un proyecto</option>
-            <?php foreach ($proyectos as $p): ?>
-                <option value="<?= $p->proyecto_id ?>"><?= htmlspecialchars($p->titulo) ?></option>
+
+            <?php foreach ($proyectos as $proyecto): ?>
+                <option value="<?= $proyecto->proyecto_id ?>">
+                    <?= htmlspecialchars($proyecto->titulo) ?>
+                </option>
             <?php endforeach; ?>
         </select>
     </div>
 
-    <div class="mb-3">
-        <label class="form-label">Estado</label>
-        <select name="estado_id" class="form-select" required>
-            <?php foreach ($estados as $e): ?>
-                <option value="<?= $e->estado_id ?>"><?= htmlspecialchars($e->nombre) ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Asignar a</label>
-        <select name="usuario_id" class="form-select" required>
-            <option value="">Selecciona un usuario</option>
-            <?php foreach ($usuarios as $u): ?>
-                <option value="<?= $u->usuario_id ?>"><?= htmlspecialchars($u->nombre) ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-    <button class="btn btn-primary">Crear tarea</button>
-
-</form>
+<?php endif; ?>

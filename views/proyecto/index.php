@@ -41,7 +41,6 @@
                 </div>
 
                 <p class="text-muted mt-2 mb-3">
-                    <!-- antes: $proyecto->descrion -->
                     <?= htmlspecialchars($proyecto->descripcion ?? 'Sin descripción') ?>
                 </p>
 
@@ -63,6 +62,14 @@
                              data-bs-parent="#accordion<?= $proyecto->proyecto_id ?>">
 
                             <div class="accordion-body">
+
+                                <!-- BOTÓN AGREGAR TAREA -->
+                                <div class="mb-3 text-end">
+                                    <a href="<?= BASE_URL ?>tarea/create?proyecto_id=<?= $proyecto->proyecto_id ?>" 
+                                       class="btn btn-sm btn-primary">
+                                        + Agregar tarea
+                                    </a>
+                                </div>
 
                                 <?php if ($proyecto->tareas->isEmpty()): ?>
 
